@@ -3,6 +3,14 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/user');
 
+exports.test = (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    data: null,
+    message: 'It worked!',
+  });
+};
+
 // Register new user on POST
 exports.registerPOST = [
   // Sanitise and validates body
@@ -63,6 +71,56 @@ exports.registerPOST = [
       } catch (err) {
         return next(err);
       }
+    }
+  },
+];
+
+// Login user and issue JWT on POST
+exports.loginPOST = [
+  // Sanitise and validate input
+  body('username').trim().escape(),
+  body('password').trim().escape(),
+
+  // Process request
+  async (req, res, next) => {
+    const { username, password } = req.body;
+    try {
+      const foundUser = await User.findOne({ username: username });
+      if (!foundUser) {
+        return res.status(404).json({
+          status: 'error',
+          data: null,
+          message: 'User does not exist',
+        });
+      } else {
+        bcrypt.compare(password, foundUser.password, (err, data) => {
+          if (err) {
+            return next(err);
+          }
+          if (data) {
+            const options = {
+              expiresIn: '1d',
+            };
+            const secret = process.env.JWT_SECRET;
+            const token = jwt.sign({ sub: foundUser._id }, secret, options);
+            return res.status(200).json({
+              status: 'success',
+              data: {
+                token,
+              },
+              message: 'Authentication Successful',
+            });
+          } else {
+            res.status(403).json({
+              status: 'error',
+              data: null,
+              message: 'Incorrect password',
+            });
+          }
+        });
+      }
+    } catch (err) {
+      return next(err);
     }
   },
 ];
