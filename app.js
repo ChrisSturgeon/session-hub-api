@@ -1,14 +1,23 @@
+// Package imports
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
+// Security imports
+require('dotenv').config();
+const JwtStrategy = require('./jwt');
+const passport = require('passport');
+
+// Router imports
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
-const mongoStart = require('./mongoConfig');
 
+// MongoDB
+const mongoStart = require('./mongoConfig');
 mongoStart();
+
 const app = express();
 
 // view engine setup
@@ -20,9 +29,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+passport.use(JwtStrategy);
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/api', indexRouter);
+app.use('/api/users', usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
