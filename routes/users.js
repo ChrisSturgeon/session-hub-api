@@ -16,5 +16,7 @@ router.post('/register', userController.registerPOST);
 
 router.get('/protected', authenticateJWT, userController.test);
 
+router.get('/authenticate', authenticateJWT, userController.authenticateGET);
+
 router.post('/test', userController.test);
 module.exports = router;

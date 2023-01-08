@@ -125,6 +125,14 @@ exports.loginPOST = [
   },
 ];
 
+exports.authenticateGET = (req, res, next) => {
+  res.status(200).json({
+    status: 'success',
+    data: null,
+    message: 'Authenticated successful',
+  });
+};
+
 // Update user details on PUT?
 exports.updatePUT = (req, res, next) => {
   // Update user code here
