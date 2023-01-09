@@ -10,6 +10,7 @@ const cors = require('cors');
 require('dotenv').config();
 const JwtStrategy = require('./jwt');
 const passport = require('passport');
+const FacebookStrategy = require('passport-facebook');
 
 // Router imports
 const indexRouter = require('./routes/index');
@@ -17,6 +18,7 @@ const usersRouter = require('./routes/users');
 
 // MongoDB
 const mongoStart = require('./mongoConfig');
+const User = require('./models/user');
 mongoStart();
 
 const app = express();
@@ -33,6 +35,42 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 passport.use(JwtStrategy);
 
+// Facebook login strategy
+passport.use(
+  new FacebookStrategy(
+    {
+      clientID: process.env.FACEBOOK_APP_ID,
+      clientSecret: process.env.FACEBOOK_APP_SECRET,
+      callbackURL: 'http://localhost:3000/api/users/oauth2/redirect/facebook',
+    },
+    function (accessToken, refreshToken, profile, cb) {
+      User.find({ facebookID: profile.id }, async function (err, user) {
+        if (err) {
+          return cb(err);
+        }
+        if (!user) {
+          try {
+            const user = new User({
+              username: profile.displayName,
+              profileComplete: false,
+              joined: new Date(),
+              friends: [],
+              friendRequests: [],
+              sports: [],
+              facebookID: profile.id,
+            });
+            await user.save();
+            return cb(err, user);
+          } catch (err) {
+            return cb(err);
+          }
+        } else {
+          return cb(null, user);
+        }
+      });
+    }
+  )
+);
 app.use('/api', indexRouter);
 app.use('/api/users', usersRouter);
 
@@ -49,7 +87,7 @@ app.use(function (err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.json(err);
 });
 
 module.exports = app;
