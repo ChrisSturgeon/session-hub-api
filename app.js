@@ -15,6 +15,7 @@ const FacebookStrategy = require('passport-facebook');
 // Router imports
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
+const friendsRouter = require('./routes/friends');
 
 // MongoDB
 const mongoStart = require('./mongoConfig');
@@ -36,43 +37,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 passport.use(JwtStrategy);
 
 // Facebook login strategy
-passport.use(
-  new FacebookStrategy(
-    {
-      clientID: process.env.FACEBOOK_APP_ID,
-      clientSecret: process.env.FACEBOOK_APP_SECRET,
-      callbackURL: 'http://localhost:3000/api/users/oauth2/redirect/facebook',
-    },
-    function (accessToken, refreshToken, profile, cb) {
-      User.find({ facebookID: profile.id }, async function (err, user) {
-        if (err) {
-          return cb(err);
-        }
-        if (!user) {
-          try {
-            const user = new User({
-              username: profile.displayName,
-              profileComplete: false,
-              joined: new Date(),
-              friends: [],
-              friendRequests: [],
-              sports: [],
-              facebookID: profile.id,
-            });
-            await user.save();
-            return cb(err, user);
-          } catch (err) {
-            return cb(err);
-          }
-        } else {
-          return cb(null, user);
-        }
-      });
-    }
-  )
-);
+
 app.use('/api', indexRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/friends', friendsRouter);
+
+// Uncomment to console log trace warning
+// process.on('warning', (e) => console.warn(e.stack));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

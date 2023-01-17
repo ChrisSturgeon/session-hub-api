@@ -2,12 +2,14 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/user');
+const e = require('express');
 
 exports.test = (req, res) => {
   res.status(200).json({
     status: 'success',
     data: null,
     message: 'It worked!',
+    user: req.userID,
   });
 };
 
@@ -43,16 +45,16 @@ exports.registerPOST = [
     // Check for validation errors and return in array if present
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json(errors.mapped());
+      return res.status(400).json(errors.mapped());
     } else {
       // Check request username doesn't already exist in the database
       const existingUser = await User.findOne({ username: req.body.username });
       if (existingUser) {
-        return res
-          .status(409)
-          .send(
-            `A user with username ${req.body.username} already exists. Please choose a different username.`
-          );
+        return res.status(409).json({
+          status: 'error',
+          data: null,
+          message: 'Username already exists',
+        });
       }
       // Hash password, create User object, and store it in the database
       try {
@@ -67,7 +69,11 @@ exports.registerPOST = [
           sports: [],
         });
         await user.save();
-        res.status(200).send('User successfully created in database');
+        res.status(200).json({
+          status: 'success',
+          data: null,
+          message: 'User successfully created',
+        });
       } catch (err) {
         return next(err);
       }
@@ -141,4 +147,43 @@ exports.updatePUT = (req, res, next) => {
 // Delete user on POST method
 exports.deletePOST = (req, res, next) => {
   // Delete user code here
+};
+
+// Returns list of all users on platform
+exports.all = async (req, res, next) => {
+  try {
+    const users = await User.find({}, 'username');
+    res.status(200).json({
+      status: 'success',
+      data: users,
+      message: 'All registered users',
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+exports.details = async (req, res, next) => {
+  try {
+    const user = await User.findById(
+      req.userID,
+      'username profileComplete joined'
+    );
+
+    if (user) {
+      res.status(200).json({
+        status: 'success',
+        data: user,
+        message: `User details for ${user.username}`,
+      });
+    } else {
+      res.status(404).json({
+        status: 'fail',
+        data: null,
+        message: `No user details found`,
+      });
+    }
+  } catch (err) {
+    return next(err);
+  }
 };

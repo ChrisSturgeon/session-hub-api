@@ -9,25 +9,6 @@ router.get('/', function (req, res, next) {
   res.send('respond with a resource');
 });
 
-// Facebook login route on GET
-router.get('/login/facebook', passport.authenticate('facebook'));
-
-router.get(
-  '/oauth2/redirect/facebook',
-  passport.authenticate('facebook', {
-    session: false,
-    successRedirect: '',
-    failureRedirect: '/login',
-    failureMessage: true,
-  }),
-  (req, res, next) => {
-    console.log;
-    res.json({
-      message: 'Success!',
-    });
-  }
-);
-
 // Login user on POST
 router.post('/login', userController.loginPOST);
 
@@ -38,5 +19,10 @@ router.get('/protected', authenticateJWT, userController.test);
 
 router.get('/authenticate', authenticateJWT, userController.authenticateGET);
 
-router.post('/test', userController.test);
+router.get('/all', authenticateJWT, userController.all);
+
+router.post('/test', authenticateJWT, userController.test);
+
+router.get('/details', authenticateJWT, userController.details);
+
 module.exports = router;

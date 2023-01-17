@@ -6,16 +6,18 @@ require('dotenv').config();
 const options = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET,
+  passReqToCallback: true,
 };
 
-module.exports = new JwtStrategy(options, async (jwt_payload, done) => {
+module.exports = new JwtStrategy(options, async (req, jwt_payload, done) => {
   // Lookup user by ID from token payload sub
   try {
-    const found_user = await User.findById(jwt_payload.sub);
+    const user = await User.findById(jwt_payload.sub);
 
-    // Authenticate if user exists
-    if (found_user) {
-      return done(null, found_user);
+    // Authenticate if user exists and attached userID to request object
+    if (user) {
+      req.userID = user._id;
+      return done(null, user);
     } else {
       // Reject if user does not exist
       return done(null, false);
