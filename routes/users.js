@@ -23,6 +23,6 @@ router.get('/all', authenticateJWT, userController.all);
 
 router.post('/test', authenticateJWT, userController.test);
 
-router.get('/details', authenticateJWT, userController.details);
+router.get('/profile/:userID', authenticateJWT, userController.profile);
 
 module.exports = router;

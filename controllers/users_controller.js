@@ -113,6 +113,9 @@ exports.loginPOST = [
               status: 'success',
               data: {
                 token,
+                username: foundUser.username,
+                ID: foundUser._id,
+                profileComplete: foundUser.profileComplete,
               },
               message: 'Authentication Successful',
             });
@@ -131,12 +134,29 @@ exports.loginPOST = [
   },
 ];
 
-exports.authenticateGET = (req, res, next) => {
-  res.status(200).json({
-    status: 'success',
-    data: null,
-    message: 'Authenticated successful',
-  });
+exports.authenticateGET = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.userID, 'username profileComplete');
+    if (user) {
+      res.status(200).json({
+        status: 'success',
+        data: {
+          username: user.username,
+          ID: user._id,
+          profileComplete: user.profileComplete,
+        },
+        message: 'Authentication successful',
+      });
+    } else {
+      res.status(404).json({
+        status: 'fail',
+        data: null,
+        message: 'No user found in database',
+      });
+    }
+  } catch (err) {
+    return next(err);
+  }
 };
 
 // Update user details on PUT?
@@ -163,24 +183,29 @@ exports.all = async (req, res, next) => {
   }
 };
 
-exports.details = async (req, res, next) => {
+exports.profile = async (req, res, next) => {
   try {
     const user = await User.findById(
-      req.userID,
-      'username profileComplete joined'
+      req.params.userID,
+      'username bio joined sports'
     );
 
     if (user) {
       res.status(200).json({
         status: 'success',
-        data: user,
-        message: `User details for ${user.username}`,
+        data: {
+          username: user.username,
+          bio: user.bio,
+          joined: user.joined,
+          sports: user.sports,
+        },
+        message: `Profile details for user ${req.params.userID}`,
       });
     } else {
       res.status(404).json({
         status: 'fail',
         data: null,
-        message: `No user details found`,
+        message: `No user with id ${req.params.userID} found`,
       });
     }
   } catch (err) {
