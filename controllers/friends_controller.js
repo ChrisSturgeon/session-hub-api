@@ -37,6 +37,7 @@ exports.requestCreate = async (req, res, next) => {
         });
         // Save request in database and return success json
         await friendRequest.save();
+
         res.status(201).json({
           status: 'success',
           data: null,
@@ -146,7 +147,7 @@ exports.requestRespond = async (req, res, next) => {
   }
 };
 
-// Returns friends list as array in JSON
+// Returns friends list as array in JSON for given userID
 exports.allFriends = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.userID);

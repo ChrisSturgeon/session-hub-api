@@ -15,3 +15,5 @@ const FriendRequest = new Schema({
 });
 
 module.exports = mongoose.model('FriendRequest', FriendRequest);
+
+

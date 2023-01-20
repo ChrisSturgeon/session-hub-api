@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/user');
+const FriendRequest = require('../models/friendRequest');
 const e = require('express');
 
 exports.test = (req, res) => {
@@ -99,7 +100,7 @@ exports.loginPOST = [
           message: 'User does not exist',
         });
       } else {
-        bcrypt.compare(password, foundUser.password, (err, data) => {
+        bcrypt.compare(password, foundUser.password, async (err, data) => {
           if (err) {
             return next(err);
           }
@@ -109,16 +110,40 @@ exports.loginPOST = [
             };
             const secret = process.env.JWT_SECRET;
             const token = jwt.sign({ sub: foundUser._id }, secret, options);
-            return res.status(200).json({
-              status: 'success',
-              data: {
-                token,
-                username: foundUser.username,
-                ID: foundUser._id,
-                profileComplete: foundUser.profileComplete,
-              },
-              message: 'Authentication Successful',
+
+            // Retrieve any pending friends request
+            const pendingRequests = await FriendRequest.find({
+              'requester.ID': req.userID,
+              status: 'pending',
             });
+
+            if (pendingRequests) {
+              return res.status(200).json({
+                status: 'success',
+                data: {
+                  token,
+                  username: foundUser.username,
+                  ID: foundUser._id,
+                  profileComplete: foundUser.profileComplete,
+                  friends: foundUser.friends,
+                  pendingRequests: pendingRequests,
+                },
+                message: 'Log In Successful',
+              });
+            } else {
+              return res.status(200).json({
+                status: 'success',
+                data: {
+                  token,
+                  username: foundUser.username,
+                  ID: foundUser._id,
+                  profileComplete: foundUser.profileComplete,
+                  friends: foundUser.friends,
+                  pendingRequests: [],
+                },
+                message: 'Log In Successful',
+              });
+            }
           } else {
             res.status(403).json({
               status: 'error',
@@ -136,17 +161,42 @@ exports.loginPOST = [
 
 exports.authenticateGET = async (req, res, next) => {
   try {
-    const user = await User.findById(req.userID, 'username profileComplete');
+    const user = await User.findById(
+      req.userID,
+      'username profileComplete friends'
+    );
     if (user) {
-      res.status(200).json({
-        status: 'success',
-        data: {
-          username: user.username,
-          ID: user._id,
-          profileComplete: user.profileComplete,
-        },
-        message: 'Authentication successful',
+      // Retrieve any pending friends request
+      const pendingRequests = await FriendRequest.find({
+        'requester.ID': req.userID,
+        status: 'pending',
       });
+
+      if (pendingRequests) {
+        res.status(200).json({
+          status: 'success',
+          data: {
+            username: user.username,
+            ID: user._id,
+            profileComplete: user.profileComplete,
+            friends: user.friends,
+            pendingRequests: pendingRequests,
+          },
+          message: 'Authentication successful',
+        });
+      } else {
+        res.status(200).json({
+          status: 'success',
+          data: {
+            username: user.username,
+            ID: user._id,
+            profileComplete: user.profileComplete,
+            friends: user.friends,
+            pendingRequests: [],
+          },
+          message: 'Authentication successful',
+        });
+      }
     } else {
       res.status(404).json({
         status: 'fail',
@@ -172,12 +222,23 @@ exports.deletePOST = (req, res, next) => {
 // Returns list of all users on platform
 exports.all = async (req, res, next) => {
   try {
-    const users = await User.find({}, 'username');
-    res.status(200).json({
-      status: 'success',
-      data: users,
-      message: 'All registered users',
-    });
+    const users = await User.find({}, 'username')
+      .collation({ locale: 'en' })
+      .sort('username');
+
+    if (users) {
+      res.status(200).json({
+        status: 'success',
+        data: users,
+        message: 'All registered users',
+      });
+    } else {
+      res.status(404).json({
+        status: 'fail',
+        data: null,
+        message: 'No data for all users found',
+      });
+    }
   } catch (err) {
     return next(err);
   }
