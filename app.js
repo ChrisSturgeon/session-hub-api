@@ -10,12 +10,12 @@ const cors = require('cors');
 require('dotenv').config();
 const JwtStrategy = require('./jwt');
 const passport = require('passport');
-const FacebookStrategy = require('passport-facebook');
 
 // Router imports
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const friendsRouter = require('./routes/friends');
+const sessionsRouter = require('./routes/sessions');
 
 // MongoDB
 const mongoStart = require('./mongoConfig');
@@ -41,6 +41,7 @@ passport.use(JwtStrategy);
 app.use('/api', indexRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/friends', friendsRouter);
+app.use('/api/sessions', sessionsRouter);
 
 // Uncomment to console log trace warning
 // process.on('warning', (e) => console.warn(e.stack));
