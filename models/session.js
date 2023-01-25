@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const SessionSchema = new Schema({
   userID: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   username: { type: String, required: true },
-  description: { type: String, maxLength: 2000 },
+  description: { type: String, maxLength: 2500 },
   createdDate: { type: Date, required: true },
   activityDate: { type: Date, required: true },
   sport: { type: String, maxLength: 20 },

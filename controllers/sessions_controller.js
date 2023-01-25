@@ -39,8 +39,10 @@ exports.new = [
     .trim()
     .escape(),
   body('description')
-    .isLength({ max: 2000 })
-    .withMessage('Session description must be less than 2000 characters')
+    .isLength({ max: 2500 })
+    .withMessage(
+      'Session description must be less than 2500 characters when escaped'
+    )
     .trim()
     .escape(),
 
@@ -148,6 +150,31 @@ exports.overviews = async (req, res, next) => {
         message: `No sessions found for user ${req.params.userID}`,
       });
     }
+  } catch (err) {
+    return next(err);
+  }
+};
+
+// Returns details for a given session
+exports.detail = async (req, res, next) => {
+  console.log(req.params.sessionID);
+  try {
+    const session = await Session.findById(req.params.sessionID);
+    console.log(session);
+
+    if (!session) {
+      res.status(404).json({
+        status: 'fail',
+        data: null,
+        message: `No session with ID ${req.params.sessionID} found`,
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: session,
+      message: `Session data for ${req.params.sessionID}`,
+    });
   } catch (err) {
     return next(err);
   }
