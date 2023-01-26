@@ -160,7 +160,6 @@ exports.detail = async (req, res, next) => {
   console.log(req.params.sessionID);
   try {
     const session = await Session.findById(req.params.sessionID);
-    console.log(session);
 
     if (!session) {
       res.status(404).json({

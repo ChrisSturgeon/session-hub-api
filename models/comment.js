@@ -7,6 +7,7 @@ const CommentSchema = new Schema({
   username: { type: String, required: true },
   text: { type: String, maxLength: 1000 },
   createdDate: { type: Date },
+  editedDate: { type: Date },
   likes: [],
 });
 
