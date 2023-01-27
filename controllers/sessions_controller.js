@@ -1,6 +1,9 @@
 const { body, validationResult } = require('express-validator');
 const Session = require('../models/session');
 const User = require('../models/user');
+const mongoose = require('mongoose');
+const { ResultWithContext } = require('express-validator/src/chain');
+const ObjectId = mongoose.Types.ObjectId;
 
 // Creates new Session in database
 exports.new = [
@@ -136,7 +139,35 @@ exports.overviews = async (req, res, next) => {
         message: 'No user found',
       });
     }
-    const sessions = await Session.find({ userID: req.params.userID });
+    const filter = { userID: ObjectId(req.params.userID) };
+    const sessions = await Session.aggregate([
+      { $match: filter },
+      {
+        $lookup: {
+          from: 'comments',
+          localField: '_id',
+          foreignField: 'sessionID',
+          as: 'commentsCount',
+        },
+      },
+      {
+        $addFields: {
+          hasLiked: {
+            $cond: [{ $in: [req.userID, '$likes'] }, true, false],
+          },
+          likesCount: { $size: '$likes' },
+          commentsCount: { $size: '$commentsCount' },
+        },
+      },
+      {
+        $project: {
+          likes: 0,
+          description: 0,
+          createdDate: 0,
+          equipment: 0,
+        },
+      },
+    ]);
     if (sessions) {
       res.status(200).json({
         status: 'success',
@@ -157,9 +188,34 @@ exports.overviews = async (req, res, next) => {
 
 // Returns details for a given session
 exports.detail = async (req, res, next) => {
-  console.log(req.params.sessionID);
   try {
-    const session = await Session.findById(req.params.sessionID);
+    const filter = { _id: ObjectId(req.params.sessionID) };
+    const session = await Session.aggregate([
+      { $match: filter },
+      { $limit: 1 },
+      {
+        $lookup: {
+          from: 'comments',
+          localField: '_id',
+          foreignField: 'sessionID',
+          as: 'commentsCount',
+        },
+      },
+      {
+        $addFields: {
+          hasLiked: {
+            $cond: [{ $in: [req.userID, '$likes'] }, true, false],
+          },
+          likesCount: { $size: '$likes' },
+          commentsCount: { $size: '$commentsCount' },
+        },
+      },
+      {
+        $project: {
+          likes: 0,
+        },
+      },
+    ]);
 
     if (!session) {
       res.status(404).json({
@@ -168,11 +224,148 @@ exports.detail = async (req, res, next) => {
         message: `No session with ID ${req.params.sessionID} found`,
       });
     }
+    res.status(200).json({
+      status: 'success',
+      data: session[0],
+      message: `Session data for ${req.params.sessionID}`,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+exports.like = [
+  body('wantsToLike').exists().withMessage('Required as stringified boolean'),
+
+  async (req, res, next) => {
+    console.log(req.body.wantsToLike);
+    try {
+      const session = await Session.findById(req.params.sessionID);
+
+      if (!session) {
+        res.status(404).json({
+          status: 'fail',
+          data: null,
+          message: `Session ${req.params.sessoinID} not found`,
+        });
+        return;
+      }
+
+      if (req.body.wantsToLike === 'true') {
+        const existingLike = await Session.findOne({
+          _id: req.params.sessionID,
+          likes: { $in: req.userID },
+        });
+
+        if (existingLike) {
+          res.status(409).json({
+            status: 'fail',
+            data: null,
+            message: `User ${req.userID} already likes this session`,
+          });
+          return;
+        }
+
+        await Session.findByIdAndUpdate(req.params.sessionID, {
+          $push: { likes: req.userID },
+        });
+
+        res.status(201).json({
+          status: 'success',
+          data: null,
+          message: 'Session successfully liked',
+        });
+        return;
+      } else {
+        // User has unliked the Session
+        await Session.findByIdAndUpdate(req.params.sessionID, {
+          $pull: { likes: req.userID },
+        });
+
+        res.status(200).json({
+          status: 'success',
+          data: null,
+          message: 'Session successfully un-liked',
+        });
+      }
+    } catch (err) {
+      return next(err);
+    }
+  },
+];
+
+exports.feed = async (req, res, next) => {
+  if (req.userID.toString() !== req.params.userID.toString()) {
+    res.status(403).json({
+      status: 'fail',
+      data: null,
+      message: 'You are not authorised to retrieve this resource',
+    });
+    return;
+  }
+  try {
+    const filter = {
+      'friends.ID': ObjectId(req.params.userID),
+    };
+
+    const feedSessions = await User.aggregate([
+      { $match: filter },
+      { $project: { _id: 1 } },
+      {
+        $lookup: {
+          from: 'sessions',
+          localField: '_id',
+          foreignField: 'userID',
+          pipeline: [
+            { $sort: { activityDate: -1 } },
+            { $limit: 1 },
+            {
+              $lookup: {
+                from: 'comments',
+                localField: '_id',
+                foreignField: 'sessionID',
+                as: 'commentsCount',
+              },
+            },
+            {
+              $addFields: {
+                hasLiked: {
+                  $cond: [
+                    { $in: [ObjectId(req.params.userID), '$likes'] },
+                    true,
+                    false,
+                  ],
+                },
+                likesCount: { $size: '$likes' },
+                commentsCount: { $size: '$commentsCount' },
+              },
+            },
+            {
+              $project: {
+                createdDate: 0,
+                equipment: 0,
+                description: 0,
+              },
+            },
+          ],
+          as: 'post',
+        },
+      },
+      { $sort: { 'post.activityDate': -1 } },
+    ]);
+
+    if (!feedSessions) {
+      res.status(404).json({
+        status: 'fail',
+        data: null,
+        message: 'No latest sessions found',
+      });
+    }
 
     res.status(200).json({
       status: 'success',
-      data: session,
-      message: `Session data for ${req.params.sessionID}`,
+      data: feedSessions,
+      message: `Latest sessions of friends for user ${req.params.userID}`,
     });
   } catch (err) {
     return next(err);
