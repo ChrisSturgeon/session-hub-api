@@ -1,5 +1,4 @@
 const express = require('express');
-const passport = require('passport');
 const router = express.Router();
 const userController = require('../controllers/users_controller');
 const authenticateJWT = require('../protected.js');

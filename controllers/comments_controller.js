@@ -1,12 +1,13 @@
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
+const { body, validationResult } = require('express-validator');
+
+// Model imports
 const Session = require('../models/session');
 const Comment = require('../models/comment');
 const User = require('../models/user');
-const { body, validationResult } = require('express-validator');
-const { reset } = require('nodemon');
-const mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
 
-// Creates new comment in database for given Session ID.
+// Creates new comment in database linked to given SessionID
 exports.new = [
   body('date').exists().withMessage('Comment date required'),
   body('text')
@@ -28,12 +29,12 @@ exports.new = [
     }
 
     try {
-      const user = await User.findById(req.userID);
+      const user = await User.findById(req.user._id);
       if (!user) {
         res.status(404).json({
           status: 'fail',
           data: null,
-          message: `User ${req.userID} not found`,
+          message: `User not found`,
         });
         return;
       }
@@ -71,7 +72,7 @@ exports.new = [
   },
 ];
 
-// Returns comments array for given Session ID
+// Returns all related comments in array for a given Session ID
 exports.all = async (req, res, next) => {
   try {
     const filter = { sessionID: ObjectId(req.params.sessionID) };
@@ -80,7 +81,7 @@ exports.all = async (req, res, next) => {
       {
         $addFields: {
           hasLiked: {
-            $cond: [{ $in: [req.userID, '$likes'] }, true, false],
+            $cond: [{ $in: [req.user._id, '$likes'] }, true, false],
           },
           likesCount: { $size: '$likes' },
         },
@@ -111,87 +112,58 @@ exports.all = async (req, res, next) => {
   }
 };
 
-// Likes or unlikes comment for give session and comment IDs
-exports.like = [
-  body('wantsToLike').exists(),
-  async (req, res, next) => {
-    try {
-      const comment = await Comment.findById(req.params.commentID);
-
-      if (!comment) {
-        res.status(404).json({
-          status: 'fail',
-          data: null,
-          message: `Cannot find comment ${req.params.commentID}`,
-        });
-        return;
-      }
-
-      if (req.body.wantsToLike === 'true') {
-        const existingLike = await Comment.findOne({
-          _id: req.params.commentID,
-          likes: { $in: req.userID },
-        });
-
-        if (existingLike) {
-          res.status(409).json({
-            status: 'fail',
-            data: null,
-            message: `User ${req.userID} already likes this comment`,
-          });
-          return;
-        }
-
-        await Comment.findByIdAndUpdate(req.params.commentID, {
-          $push: { likes: req.userID },
-        });
-
-        res.status(201).json({
-          status: 'success',
-          data: null,
-          message: 'Comment successfully liked',
-        });
-        return;
-      } else {
-        // User has unliked the comment
-        await Comment.findByIdAndUpdate(req.params.commentID, {
-          $pull: { likes: req.userID },
-        });
-
-        res.status(200).json({
-          status: 'success',
-          data: null,
-          message: 'Comment successfully un-liked',
-        });
-      }
-    } catch (err) {
-      return next(err);
-    }
-  },
-];
-
-exports.testAggregation = async (req, res, next) => {
+// Likes comment
+exports.like = async (req, res, next) => {
   try {
-    const filter = { sessionID: ObjectId(req.params.sessionID) };
-    const comments = await Comment.aggregate([
-      { $match: filter },
-      {
-        $addFields: {
-          hasLiked: {
-            $cond: [{ $in: [req.userID, '$likes'] }, true, false],
-          },
-          likesCount: { $size: '$likes' },
-        },
-      },
-      {
-        $project: {
-          likes: 0,
-        },
-      },
-    ]);
+    const comment = await Comment.findById(req.params.commentID);
+    if (!comment) {
+      res.status(404).json({
+        status: 'fail',
+        data: null,
+        message: `Cannot find comment ${req.params.commentID}`,
+      });
+      return;
+    }
 
-    res.json({
-      data: comments,
+    const existingLike = await Comment.findOne({
+      _id: req.params.commentID,
+      likes: { $in: req.user._id },
+    });
+
+    if (existingLike) {
+      res.status(409).json({
+        status: 'fail',
+        data: null,
+        message: `User ${req.user._id} already likes this comment`,
+      });
+      return;
+    }
+
+    await Comment.findByIdAndUpdate(req.params.commentID, {
+      $push: { likes: req.user._id },
+    });
+
+    res.status(201).json({
+      status: 'success',
+      data: null,
+      message: 'Comment successfully liked',
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+// Unlikes comment
+exports.unlike = async (req, res, next) => {
+  try {
+    await Comment.findByIdAndUpdate(req.params.commentID, {
+      $pull: { likes: req.user._id },
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: null,
+      message: 'Comment successfully un-liked',
     });
   } catch (err) {
     return next(err);

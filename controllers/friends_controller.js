@@ -5,8 +5,8 @@ const FriendRequest = require('../models/friendRequest');
 exports.requestCreate = async (req, res, next) => {
   // Check to make sure both users existing in database
   try {
-    const requester = await User.findById(req.userID);
-    const requestee = await User.findById(req.body.userID);
+    const requester = await User.findById(req.user_id);
+    const requestee = await User.findById(req.body.requesteeID);
 
     if (requestee && requester) {
       // Check no pending request between users already exists
@@ -62,7 +62,7 @@ exports.requestRespond = async (req, res, next) => {
     // Check request still exists
     const friendRequest = await FriendRequest.findById(req.params.requestID);
 
-    if (friendRequest.requestee.ID.toString() !== req.userID.toString()) {
+    if (friendRequest.requestee.ID.toString() !== req.user._id.toString()) {
       res.status(401).json({
         status: 'fail',
         data: null,
@@ -174,14 +174,14 @@ exports.allFriends = async (req, res, next) => {
 exports.allRequests = async (req, res, next) => {
   try {
     const pendingRequests = await FriendRequest.find({
-      'requestee.ID': req.userID,
+      'requestee.ID': req.user._id,
       status: 'pending',
     });
 
     if (pendingRequests.length) {
       res.status(200).json({
         status: 'success',
-        requesteeID: req.userID,
+        requesteeID: req.user._id,
         data: pendingRequests,
         message: 'Found Pending friend requests',
       });

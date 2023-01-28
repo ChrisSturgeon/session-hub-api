@@ -16,10 +16,10 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const friendsRouter = require('./routes/friends');
 const sessionsRouter = require('./routes/sessions');
+const commentsRouter = require('./routes/comments');
 
 // MongoDB
 const mongoStart = require('./mongoConfig');
-const User = require('./models/user');
 mongoStart();
 
 const app = express();
@@ -42,6 +42,7 @@ app.use('/api', indexRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/friends', friendsRouter);
 app.use('/api/sessions', sessionsRouter);
+app.use('/api/comments', commentsRouter);
 
 // Uncomment to console log trace warning
 // process.on('warning', (e) => console.warn(e.stack));

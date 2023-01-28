@@ -1,9 +1,10 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
+
+// Models imports
 const User = require('../models/user');
 const FriendRequest = require('../models/friendRequest');
-const e = require('express');
 
 exports.test = (req, res) => {
   res.status(200).json({
@@ -162,13 +163,13 @@ exports.loginPOST = [
 exports.authenticateGET = async (req, res, next) => {
   try {
     const user = await User.findById(
-      req.userID,
+      req.user._id,
       'username profileComplete friends'
     );
     if (user) {
       // Retrieve any pending friends request
       const pendingRequests = await FriendRequest.find({
-        'requester.ID': req.userID,
+        'requester.ID': req.user._id,
         status: 'pending',
       });
 

@@ -16,7 +16,7 @@ module.exports = new JwtStrategy(options, async (req, jwt_payload, done) => {
 
     // Authenticate if user exists and attached userID to request object
     if (user) {
-      req.userID = user._id;
+      req.tokenID = user._id;
       return done(null, user);
     } else {
       // Reject if user does not exist
