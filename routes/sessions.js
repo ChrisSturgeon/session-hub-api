@@ -45,7 +45,7 @@ router.post('/:sessionID/comments/', authenticateJWT, commentsController.new);
 // TODO: ADD - Update comment
 router.put('/:sessionID/comments/:commentID');
 
-// TODO: Add - Delete comment
+// TODO: Add -Delete comment
 router.delete('/:sessionID/comments/:commentID');
 
 // Like comment

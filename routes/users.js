@@ -1,27 +1,30 @@
 const express = require('express');
 const router = express.Router();
-const userController = require('../controllers/users_controller');
+const usersController = require('../controllers/users_controller');
 const authenticateJWT = require('../protected.js');
 
 /* GET users listing. */
-router.get('/', function (req, res, next) {
-  res.send('respond with a resource');
-});
+// router.get('/', function (req, res, next) {
+//   res.send('respond with a resource');
+// });
 
-// Login user on POST
-router.post('/login', userController.loginPOST);
+// ***** Registration, Login & Auth *****
 
 // Register new user on POST
-router.post('/register', userController.registerPOST);
+router.post('/register', usersController.registerPOST);
 
-router.get('/protected', authenticateJWT, userController.test);
+// Login user on POST
+router.post('/login', usersController.loginPOST);
 
-router.get('/authenticate', authenticateJWT, userController.authenticateGET);
+// Authenticates JWT and returns user details
+router.get('/authenticate', authenticateJWT, usersController.authenticateGET);
 
-router.get('/all', authenticateJWT, userController.all);
+// ***** User Profiles *****
 
-router.post('/test', authenticateJWT, userController.test);
+// All registered users
+router.get('/', authenticateJWT, usersController.all);
 
-router.get('/profile/:userID', authenticateJWT, userController.profile);
+// Profile details for individual user
+router.get('/profile/:userID', authenticateJWT, usersController.profile);
 
 module.exports = router;

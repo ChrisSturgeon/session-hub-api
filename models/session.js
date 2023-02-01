@@ -11,6 +11,7 @@ const SessionSchema = new Schema({
   locationName: { type: String, maxLength: 30 },
   coords: { type: Array, maxLength: 2 },
   equipment: { type: Object },
+  conditions: { type: Object },
   likes: [],
 });
 

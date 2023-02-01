@@ -19,4 +19,7 @@ router.get('/request/all', authenticateJWT, friendsController.allRequests);
 
 router.get('/:userID/all', authenticateJWT, friendsController.allFriends);
 
+// Returns 10 most recent friends of user
+router.get('/recent', authenticateJWT, friendsController.recent);
+
 module.exports = router;

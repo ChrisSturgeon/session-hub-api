@@ -49,6 +49,12 @@ exports.new = [
     )
     .trim()
     .escape(),
+  body('conditions.wind.direction').isInt({ min: 0, max: 360 }),
+  body('conditions.wind.speed').isInt({ min: 0, max: 200 }),
+  body('conditions.wind.gust').isInt({ min: 0, max: 200 }),
+  body('conditions.swell.direction').isInt({ min: 0, max: 360 }),
+  body('conditions.swell.height').isInt({ min: 0, max: 50 }),
+  body('conditions.swell.frequency').isInt({ min: 0, max: 50 }),
 
   async (req, res, next) => {
     const errors = validationResult(req);
@@ -105,13 +111,15 @@ exports.new = [
             locationName: req.body.location.name,
             coords: req.body.location.coords,
             equipment: req.body.equipment ? equipment : null,
+            conditions: req.body.conditions,
             likes: [],
           });
 
-          await session.save();
+          const newSession = await session.save();
+
           res.status(200).json({
             status: 'success',
-            data: null,
+            data: newSession._id,
             message: 'Session created',
           });
         } else {

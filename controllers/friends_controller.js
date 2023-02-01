@@ -196,3 +196,28 @@ exports.allRequests = async (req, res, next) => {
     return next(err);
   }
 };
+
+exports.recent = async (req, res, next) => {
+  try {
+    const recentFriends = await User.find(
+      { _id: req.user._id },
+      'friends'
+    ).sort({ since: 1 });
+
+    if (recentFriends) {
+      res.status(200).json({
+        status: 'success',
+        data: recentFriends,
+        message: 'recent friends',
+      });
+      return;
+    }
+    res.status(404).json({
+      status: 'fail',
+      data: null,
+      message: 'No recent friends found',
+    });
+  } catch (err) {
+    return next(err);
+  }
+};

@@ -6,15 +6,6 @@ const { body, validationResult } = require('express-validator');
 const User = require('../models/user');
 const FriendRequest = require('../models/friendRequest');
 
-exports.test = (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    data: null,
-    message: 'It worked!',
-    user: req.userID,
-  });
-};
-
 // Register new user on POST
 exports.registerPOST = [
   // Sanitise and validates body
@@ -107,7 +98,7 @@ exports.loginPOST = [
           }
           if (data) {
             const options = {
-              expiresIn: '1d',
+              expiresIn: '7d',
             };
             const secret = process.env.JWT_SECRET;
             const token = jwt.sign({ sub: foundUser._id }, secret, options);
