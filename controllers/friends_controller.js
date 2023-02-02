@@ -5,7 +5,7 @@ const FriendRequest = require('../models/friendRequest');
 exports.requestCreate = async (req, res, next) => {
   // Check to make sure both users existing in database
   try {
-    const requester = await User.findById(req.user_id);
+    const requester = await User.findById(req.user._id);
     const requestee = await User.findById(req.body.requesteeID);
 
     if (requestee && requester) {

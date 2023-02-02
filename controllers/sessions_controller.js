@@ -49,12 +49,12 @@ exports.new = [
     )
     .trim()
     .escape(),
-  body('conditions.wind.direction').isInt({ min: 0, max: 360 }),
-  body('conditions.wind.speed').isInt({ min: 0, max: 200 }),
-  body('conditions.wind.gust').isInt({ min: 0, max: 200 }),
-  body('conditions.swell.direction').isInt({ min: 0, max: 360 }),
-  body('conditions.swell.height').isInt({ min: 0, max: 50 }),
-  body('conditions.swell.frequency').isInt({ min: 0, max: 50 }),
+  body('conditions.wind.direction').isFloat({ min: 0, max: 360 }),
+  body('conditions.wind.speed').isFloat({ min: 0, max: 200 }),
+  body('conditions.wind.gust').isFloat({ min: 0, max: 200 }),
+  body('conditions.swell.direction').isFloat({ min: 0, max: 360 }),
+  body('conditions.swell.height').isFloat({ min: 0, max: 50 }),
+  body('conditions.swell.frequency').isFloat({ min: 0, max: 50 }),
 
   async (req, res, next) => {
     const errors = validationResult(req);
@@ -287,6 +287,7 @@ exports.feed = async (req, res, next) => {
                 createdDate: 0,
                 equipment: 0,
                 description: 0,
+                conditions: 0,
               },
             },
           ],
