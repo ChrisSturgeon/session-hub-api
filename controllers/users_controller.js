@@ -80,7 +80,6 @@ exports.loginPOST = [
   body('username').trim().escape(),
   body('password').trim().escape(),
 
-  // Process request
   async (req, res, next) => {
     const { username, password } = req.body;
     try {
@@ -240,7 +239,7 @@ exports.profile = async (req, res, next) => {
   try {
     const user = await User.findById(
       req.params.userID,
-      'username bio joined sports'
+      'username bio joined sports imgURL'
     );
 
     if (user) {
@@ -251,6 +250,7 @@ exports.profile = async (req, res, next) => {
           bio: user.bio,
           joined: user.joined,
           sports: user.sports,
+          imgURL: user.imgURL,
         },
         message: `Profile details for user ${req.params.userID}`,
       });
@@ -261,6 +261,42 @@ exports.profile = async (req, res, next) => {
         message: `No user with id ${req.params.userID} found`,
       });
     }
+  } catch (err) {
+    return next(err);
+  }
+};
+
+exports.updateProfilePhoto = async (req, res, next) => {
+  try {
+    // Check request is same as current user
+
+    if (req.params.userID.toString() !== req.user._id.toString()) {
+      res.status(403).json({
+        status: 'fail',
+        data: null,
+        message: 'You do not have permission to access this resource',
+      });
+      return;
+    }
+
+    const user = User.findById(req.params.userID);
+
+    if (!user) {
+      res.send(404).json({
+        status: 'fail',
+        data: null,
+        message: `User ${req.params.userID} not found`,
+      });
+      return;
+    }
+
+    await User.findByIdAndUpdate(req.params.userID, { imgURL: 'hello!' });
+
+    res.status(200).json({
+      status: 'success',
+      data: null,
+      message: 'Profile picture successfully updated',
+    });
   } catch (err) {
     return next(err);
   }

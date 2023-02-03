@@ -27,4 +27,11 @@ router.get('/', authenticateJWT, usersController.all);
 // Profile details for individual user
 router.get('/profile/:userID', authenticateJWT, usersController.profile);
 
+// Update profile picture URL
+router.put(
+  '/profile/:userID/picture',
+  authenticateJWT,
+  usersController.updateProfilePhoto
+);
+
 module.exports = router;

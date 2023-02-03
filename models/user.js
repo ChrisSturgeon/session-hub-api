@@ -10,6 +10,7 @@ const UserSchema = new Schema({
   friends: [],
   friendRequests: [],
   sports: [],
+  imgURL: { type: String, maxLength: 1000 },
 });
 
 module.exports = mongoose.model('User', UserSchema);
