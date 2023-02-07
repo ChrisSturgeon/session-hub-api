@@ -150,6 +150,7 @@ exports.loginPOST = [
   },
 ];
 
+// Returns user details for front-end authentication
 exports.authenticateGET = async (req, res, next) => {
   try {
     const user = await User.findById(
@@ -201,9 +202,39 @@ exports.authenticateGET = async (req, res, next) => {
 };
 
 // Update user details on PUT?
-exports.updatePUT = (req, res, next) => {
-  // Update user code here
-};
+exports.profileUpdate = [
+  body('sports').isArray(),
+  body('sports.*').escape().trim(),
+  body('bio').isLength({ max: 2000 }).trim().escape(),
+  body('imgURL').isLength({ max: 1000 }).trim(),
+
+  async (req, res, next) => {
+    try {
+      const errors = validationResult(req);
+
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          status: 'fail',
+          data: errors.mapped(),
+          message: 'One or more invalid session fields',
+        });
+      }
+      await User.findByIdAndUpdate(req.params.userID, {
+        bio: req.body.bio,
+        sports: req.body.sports,
+        imgURL: req.body.imgURL,
+      });
+
+      res.status(200).json({
+        status: 'success',
+        data: null,
+        message: 'Profile successfully updated',
+      });
+    } catch (err) {
+      return next(err);
+    }
+  },
+];
 
 // Delete user on POST method
 exports.deletePOST = (req, res, next) => {
@@ -239,7 +270,7 @@ exports.profile = async (req, res, next) => {
   try {
     const user = await User.findById(
       req.params.userID,
-      'username bio joined sports imgURL'
+      'username bio joined sports imgURL thumbURL'
     );
 
     if (user) {
@@ -251,6 +282,7 @@ exports.profile = async (req, res, next) => {
           joined: user.joined,
           sports: user.sports,
           imgURL: user.imgURL,
+          thumbURL: user.thumbURL,
         },
         message: `Profile details for user ${req.params.userID}`,
       });
@@ -269,7 +301,6 @@ exports.profile = async (req, res, next) => {
 exports.updateProfilePhoto = async (req, res, next) => {
   try {
     // Check request is same as current user
-
     if (req.params.userID.toString() !== req.user._id.toString()) {
       res.status(403).json({
         status: 'fail',
@@ -296,6 +327,23 @@ exports.updateProfilePhoto = async (req, res, next) => {
       status: 'success',
       data: null,
       message: 'Profile picture successfully updated',
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+// Returns 6 most recently joined users
+exports.latestUsers = async (req, res, next) => {
+  try {
+    const latestUsers = await User.find(null, 'username thumbURL')
+      .sort({ joined: -1 })
+      .limit(6);
+
+    res.status(200).json({
+      status: 'success',
+      data: latestUsers,
+      message: 'The five most recently joined users',
     });
   } catch (err) {
     return next(err);

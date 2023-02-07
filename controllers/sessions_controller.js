@@ -145,6 +145,21 @@ exports.detail = async (req, res, next) => {
       { $limit: 1 },
       {
         $lookup: {
+          from: 'users',
+          localField: 'userID',
+          foreignField: '_id',
+          as: 'userDetails',
+          pipeline: [
+            {
+              $project: {
+                thumbURL: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
           from: 'comments',
           localField: '_id',
           foreignField: 'sessionID',
@@ -252,7 +267,7 @@ exports.feed = async (req, res, next) => {
 
     const feedSessions = await User.aggregate([
       { $match: filter },
-      { $project: { _id: 1 } },
+      { $project: { _id: 1, thumbURL: 1 } },
       {
         $lookup: {
           from: 'sessions',
@@ -330,6 +345,7 @@ exports.overviews = async (req, res, next) => {
     const filter = { userID: ObjectId(req.params.userID) };
     const sessions = await Session.aggregate([
       { $match: filter },
+      { $sort: { activityDate: -1 } },
       {
         $lookup: {
           from: 'comments',

@@ -79,6 +79,22 @@ exports.all = async (req, res, next) => {
     const comments = await Comment.aggregate([
       { $match: filter },
       {
+        $lookup: {
+          from: 'users',
+          localField: 'userID',
+          foreignField: '_id',
+          as: 'userDetails',
+          pipeline: [
+            {
+              $project: {
+                thumbURL: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
         $addFields: {
           hasLiked: {
             $cond: [{ $in: [req.user._id, '$likes'] }, true, false],
