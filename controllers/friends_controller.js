@@ -1,5 +1,7 @@
 const User = require('../models/user');
 const FriendRequest = require('../models/friendRequest');
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 
 // Creates new friends request document
 exports.requestCreate = async (req, res, next) => {
@@ -150,12 +152,35 @@ exports.requestRespond = async (req, res, next) => {
 // Returns friends list as array in JSON for given userID
 exports.allFriends = async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.userID);
+    // const user = await User.findById(req.params.userID);
 
-    if (user) {
+    const filter = { _id: ObjectId(req.params.userID) };
+
+    const friends = await User.aggregate([
+      { $match: filter },
+      { $project: { friends: 1 } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'friends.ID',
+          foreignField: '_id',
+          as: 'friends',
+          pipeline: [
+            {
+              $project: {
+                thumbURL: 1,
+                username: 1,
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    if (friends) {
       res.status(200).json({
         status: 'success',
-        data: user.friends,
+        data: friends,
         message: 'Friends list',
       });
     } else {
@@ -178,11 +203,42 @@ exports.allRequests = async (req, res, next) => {
       status: 'pending',
     });
 
-    if (pendingRequests.length) {
+    const filter = {
+      'requestee.ID': ObjectId(req.user._id),
+      status: 'pending',
+    };
+
+    const requests = await FriendRequest.aggregate([
+      { $match: filter },
+      { $project: { _id: 1, requester: 1 } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'requester.ID',
+          foreignField: '_id',
+          as: 'requesterDetails',
+          pipeline: [
+            {
+              $project: {
+                thumbURL: 1,
+                username: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          requester: 0,
+        },
+      },
+    ]);
+
+    if (requests) {
       res.status(200).json({
         status: 'success',
         requesteeID: req.user._id,
-        data: pendingRequests,
+        data: requests,
         message: 'Found Pending friend requests',
       });
     } else {

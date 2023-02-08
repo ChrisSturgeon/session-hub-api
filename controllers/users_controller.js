@@ -244,7 +244,7 @@ exports.deletePOST = (req, res, next) => {
 // Returns list of all users on platform
 exports.all = async (req, res, next) => {
   try {
-    const users = await User.find({}, 'username')
+    const users = await User.find({}, 'username thumbURL')
       .collation({ locale: 'en' })
       .sort('username');
 
