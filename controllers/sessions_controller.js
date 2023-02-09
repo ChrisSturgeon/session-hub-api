@@ -136,6 +136,145 @@ exports.new = [
   },
 ];
 
+// Updates Session
+exports.update = [
+  body('date').exists().withMessage('Session date required'),
+  body('sport').exists().withMessage('Sport required').trim().escape(),
+  body('location.name')
+    .exists()
+    .withMessage('Location name required')
+    .isLength({ min: 3, max: 30 })
+    .withMessage('Location name must be at least 3 characters')
+    .trim()
+    .escape(),
+  body('location.coords')
+    .exists()
+    .withMessage('Location coordinates required')
+    .isArray({ min: 2, max: 2 })
+    .withMessage('Coordinates must be array of length 2'),
+  body('equipment.board')
+    .isLength({ max: 40 })
+    .withMessage('Board description must be 40 characters max')
+    .trim()
+    .escape(),
+  body('equipment.sail')
+    .isLength({ max: 40 })
+    .withMessage('Sail description must be at least 3 characters')
+    .trim()
+    .escape(),
+  body('equipment.kite')
+    .isLength({ max: 40 })
+    .withMessage('Kite description must be at least 3 characters')
+    .trim()
+    .escape(),
+  body('equipment.wing')
+    .isLength({ max: 40 })
+    .withMessage('Wing description must be at least 3 characters')
+    .trim()
+    .escape(),
+  body('description')
+    .isLength({ max: 2500 })
+    .withMessage(
+      'Session description must be less than 2500 characters when escaped'
+    )
+    .trim()
+    .escape(),
+  body('conditions.wind.direction').isFloat({ min: 0, max: 360 }),
+  body('conditions.wind.speed').isFloat({ min: 0, max: 200 }),
+  body('conditions.wind.gust').isFloat({ min: 0, max: 200 }),
+  body('conditions.swell.direction').isFloat({ min: 0, max: 360 }),
+  body('conditions.swell.height').isFloat({ min: 0, max: 50 }),
+  body('conditions.swell.frequency').isFloat({ min: 0, max: 50 }),
+
+  async (req, res, next) => {
+    // Check request user is post owner
+
+    const session = await Session.findById(req.params.sessionID);
+
+    if (session.userID.toString() !== req.user._id.toString()) {
+      res.status(403).json({
+        status: 'fail',
+        data: null,
+        message: 'You are not authorised to edit this resource',
+      });
+    }
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        status: 'fail',
+        data: errors.mapped(),
+        message: 'One or more invalid session fields',
+      });
+    } else {
+      try {
+        // console.log(req.body);
+        // console.log(req.params.sessionID);
+        console.log(req.user._id);
+        const user = await User.findById(req.user._id);
+        if (user) {
+          let equipment = {};
+          if (req.body.sport === 'surfing') {
+            equipment = {
+              board: req.body.equipment.board,
+            };
+          }
+
+          if (req.body.sport === 'windsurfing') {
+            equipment = {
+              board: req.body.equipment.board,
+              sail: req.body.equipment.sail,
+            };
+          }
+
+          if (req.body.sport === 'kitesurfing') {
+            equipment = {
+              board: req.body.equipment.board,
+              kite: req.body.equipment.kite,
+            };
+          }
+
+          if (req.body.sport === 'wingsurfing') {
+            equipment = {
+              board: req.body.equipment.board,
+              wing: req.body.equipment.wing,
+            };
+          }
+
+          if (req.body.sport === 'paddleboarding') {
+            equipment = {
+              board: req.body.equipment.board,
+            };
+          }
+          await Session.findByIdAndUpdate(req.params.sessionID, {
+            description: req.body.description ? req.body.description : null,
+            activityDate: req.body.date,
+            sport: req.body.sport,
+            locationName: req.body.location.name,
+            coords: req.body.location.coords,
+            equipment: req.body.equipment ? equipment : null,
+            conditions: req.body.conditions,
+          });
+
+          res.status(200).json({
+            status: 'success',
+            data: null,
+            message: 'Session Updated',
+          });
+        } else {
+          res.status(404).json({
+            status: 'fail',
+            data: null,
+            message: 'No such user found in database',
+          });
+        }
+      } catch (err) {
+        return next(err);
+      }
+    }
+  },
+];
+
 // Returns details for a given session
 exports.detail = async (req, res, next) => {
   try {

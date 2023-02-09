@@ -12,11 +12,13 @@ const commentsController = require('../controllers/comments_controller');
 // Create new session
 router.post('/', authenticateJWT, sessionsController.new);
 
-// Return all details for specific session
-router.get('/:sessionID', authenticateJWT, sessionsController.detail);
-
 // Like session
 router.put('/:sessionID/like', authenticateJWT, sessionsController.like);
+
+router.put('/:sessionID', authenticateJWT, sessionsController.update);
+
+// Return all details for specific session
+router.get('/:sessionID', authenticateJWT, sessionsController.detail);
 
 // Unlike session
 router.delete('/:sessionID/like', authenticateJWT, sessionsController.unlike);
