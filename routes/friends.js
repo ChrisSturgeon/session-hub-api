@@ -6,9 +6,10 @@ const verify = require('../verify');
 
 // Creates new friends request
 router.post(
-  '/request/create',
+  '/request/:userID',
   authenticateJWT,
-  friendsController.requestCreate
+  verify.userExists,
+  friendsController.newRequest
 );
 
 // Accepts friends request
@@ -31,19 +32,22 @@ router.delete(
 );
 
 // All friends requests for user
-router.get('/request/all', authenticateJWT, friendsController.allRequests);
-
-router.get(
-  '/request/user/:userID/all',
-  authenticateJWT,
-  verify.isUser,
-  friendsController.allRequests
-);
+router.get('/request/:userID', authenticateJWT, friendsController.allRequests);
 
 // All friends of user
-router.get('/:userID/all', authenticateJWT, friendsController.allFriends);
+router.get(
+  '/:userID/all',
+  authenticateJWT,
+  verify.userExists,
+  friendsController.allFriends
+);
 
 // Returns 10 most recent friends of user
-router.get('/recent', authenticateJWT, friendsController.recent);
+router.get(
+  '/recent',
+  authenticateJWT,
+  verify.userExists,
+  friendsController.recent
+);
 
 module.exports = router;

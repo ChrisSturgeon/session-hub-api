@@ -4,50 +4,40 @@ const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 
 // Creates new friends request document
-exports.requestCreate = async (req, res, next) => {
+exports.newRequest = async (req, res, next) => {
   try {
-    const requester = await User.findById(req.user._id);
-    const requestee = await User.findById(req.body.requesteeID);
+    const existingRequest = await FriendRequest.findOne({
+      'requester.ID': `${req.user._id}`,
+      'requestee.ID': `${req.params.userID}`,
+    });
 
-    if (requestee && requester) {
-      const existingRequest = await FriendRequest.findOne({
-        'requester.ID': `${requester._id}`,
-        'requestee.ID': `${requestee._id}`,
-      });
-
-      if (existingRequest) {
-        res.status(400).json({
-          status: 'fail',
-          data: null,
-          message: 'Friend request already exists',
-        });
-      } else {
-        const friendRequest = new FriendRequest({
-          requester: {
-            ID: requester._id,
-            name: requester.username,
-          },
-          requestee: {
-            ID: requestee._id,
-            name: requestee.username,
-          },
-          sent: new Date(),
-          status: 'pending',
-        });
-
-        await friendRequest.save();
-
-        res.status(201).json({
-          status: 'success',
-          data: null,
-          message: 'friend request created',
-        });
-      }
-    } else {
-      res.status(404).json({
+    if (existingRequest) {
+      res.status(400).json({
         status: 'fail',
         data: null,
-        message: 'One or more users not found',
+        message: 'Friend request already exists',
+      });
+      return;
+    } else {
+      const friendRequest = new FriendRequest({
+        requester: {
+          ID: ObjectId(req.user._id),
+          name: req.user.username,
+        },
+        requestee: {
+          ID: ObjectId(req.existingUser._id),
+          name: req.existingUser.username,
+        },
+        sent: new Date(),
+        status: 'pending',
+      });
+
+      await friendRequest.save();
+
+      res.status(201).json({
+        status: 'success',
+        data: null,
+        message: 'friend request created',
       });
     }
   } catch (err) {

@@ -25,6 +25,7 @@ exports.userExists = async (req, res, next) => {
       });
       return;
     }
+    req.existingUser = user;
     next();
   } catch (err) {
     return next(err);
