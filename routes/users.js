@@ -4,7 +4,7 @@ const usersController = require('../controllers/users_controller');
 const authenticateJWT = require('../protected.js');
 const verify = require('../verify');
 
-// ***** Registration, Login & Auth *****
+// *** Registration, Login & Auth ***
 
 // Register new user on POST
 router.post('/register', usersController.registerPOST);
@@ -15,7 +15,7 @@ router.post('/login', usersController.loginPOST);
 // Authenticates JWT and returns user details
 router.get('/authenticate', authenticateJWT, usersController.authenticateGET);
 
-// ***** User Profiles *****
+// *** Users & Profiles***
 
 // All registered users
 router.get('/', authenticateJWT, usersController.all);
@@ -31,13 +31,7 @@ router.put(
   usersController.profileUpdate
 );
 
-// Update profile picture URL
-router.put(
-  '/profile/:userID/picture',
-  authenticateJWT,
-  usersController.updateProfilePhoto
-);
-
+// 6 most recently joined users
 router.get('/latest', authenticateJWT, usersController.latestUsers);
 
 module.exports = router;
