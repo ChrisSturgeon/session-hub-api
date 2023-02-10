@@ -30,25 +30,7 @@ exports.new = [
 
     try {
       const user = await User.findById(req.user._id);
-      if (!user) {
-        res.status(404).json({
-          status: 'fail',
-          data: null,
-          message: `User not found`,
-        });
-        return;
-      }
-
       const session = await Session.findById(req.params.sessionID);
-      if (!session) {
-        res.status(404).json({
-          status: 'fail',
-          data: null,
-          message: `User ${req.params.sessionID} not found`,
-        });
-        return;
-      }
-
       const comment = new Comment({
         sessionID: session._id,
         userID: user._id,
@@ -113,7 +95,7 @@ exports.all = async (req, res, next) => {
       res.status(404).json({
         status: 'fail',
         data: null,
-        message: `No comments found for session ${req.params.sessionID}`,
+        message: `no comments found for session ${req.params.sessionID}`,
       });
       return;
     }
@@ -121,7 +103,21 @@ exports.all = async (req, res, next) => {
     res.status(200).json({
       status: 'success',
       data: comments,
-      message: `All comments for session ${req.params.sessionID}`,
+      message: `all comments for session ${req.params.sessionID}`,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+// Deletes comment from database
+exports.delete = async (req, res, next) => {
+  try {
+    await Comment.findByIdAndDelete(req.params.commentID);
+    res.status(200).json({
+      status: 'success',
+      data: null,
+      message: 'comment successfully deleted',
     });
   } catch (err) {
     return next(err);
@@ -131,16 +127,6 @@ exports.all = async (req, res, next) => {
 // Likes comment
 exports.like = async (req, res, next) => {
   try {
-    const comment = await Comment.findById(req.params.commentID);
-    if (!comment) {
-      res.status(404).json({
-        status: 'fail',
-        data: null,
-        message: `Cannot find comment ${req.params.commentID}`,
-      });
-      return;
-    }
-
     const existingLike = await Comment.findOne({
       _id: req.params.commentID,
       likes: { $in: req.user._id },

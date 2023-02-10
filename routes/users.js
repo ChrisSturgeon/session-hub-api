@@ -2,12 +2,7 @@ const express = require('express');
 const router = express.Router();
 const usersController = require('../controllers/users_controller');
 const authenticateJWT = require('../protected.js');
-const verifyUser = require('../authorised');
-
-/* GET users listing. */
-// router.get('/', function (req, res, next) {
-//   res.send('respond with a resource');
-// });
+const verify = require('../verify');
 
 // ***** Registration, Login & Auth *****
 
@@ -32,7 +27,7 @@ router.get('/profile/:userID', authenticateJWT, usersController.profile);
 router.put(
   '/profile/:userID',
   authenticateJWT,
-  verifyUser,
+  verify.isUser,
   usersController.profileUpdate
 );
 

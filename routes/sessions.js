@@ -1,13 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const authenticateJWT = require('../protected.js');
-const verifyUser = require('../authorised');
+const verify = require('../verify');
 
 // Controller imports
 const sessionsController = require('../controllers/sessions_controller');
 const commentsController = require('../controllers/comments_controller');
-
-// ***** Sessions *****
 
 // Create new session
 router.post('/', authenticateJWT, sessionsController.new);
@@ -15,7 +13,14 @@ router.post('/', authenticateJWT, sessionsController.new);
 // Like session
 router.put('/:sessionID/like', authenticateJWT, sessionsController.like);
 
-router.put('/:sessionID', authenticateJWT, sessionsController.update);
+// Updates session
+router.put(
+  '/:sessionID',
+  authenticateJWT,
+  verify.sessionExists,
+  verify.isSessionOwner,
+  sessionsController.update
+);
 
 // Return all details for specific session
 router.get('/:sessionID', authenticateJWT, sessionsController.detail);
@@ -29,7 +34,7 @@ router.delete('/:sessionID/like', authenticateJWT, sessionsController.unlike);
 router.get(
   '/feed/:userID',
   authenticateJWT,
-  verifyUser,
+  verify.isUser,
   sessionsController.feed
 );
 
@@ -54,6 +59,7 @@ router.delete('/:sessionID/comments/:commentID');
 router.put(
   '/:sessionID/comments/:commentID/like',
   authenticateJWT,
+  verify.commentExists,
   commentsController.like
 );
 
@@ -61,6 +67,7 @@ router.put(
 router.delete(
   '/:sessionID/comments/:commentID/like',
   authenticateJWT,
+  verify.commentExists,
   commentsController.unlike
 );
 

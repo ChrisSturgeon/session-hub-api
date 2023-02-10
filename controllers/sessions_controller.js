@@ -187,18 +187,6 @@ exports.update = [
   body('conditions.swell.frequency').isFloat({ min: 0, max: 50 }),
 
   async (req, res, next) => {
-    // Check request user is post owner
-
-    const session = await Session.findById(req.params.sessionID);
-
-    if (session.userID.toString() !== req.user._id.toString()) {
-      res.status(403).json({
-        status: 'fail',
-        data: null,
-        message: 'You are not authorised to edit this resource',
-      });
-    }
-
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
