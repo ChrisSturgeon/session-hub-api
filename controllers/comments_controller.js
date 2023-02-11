@@ -3,9 +3,7 @@ const ObjectId = mongoose.Types.ObjectId;
 const { body, validationResult } = require('express-validator');
 
 // Model imports
-const Session = require('../models/session');
 const Comment = require('../models/comment');
-const User = require('../models/user');
 
 // Creates new comment in database linked to given SessionID
 exports.new = [
@@ -29,12 +27,10 @@ exports.new = [
     }
 
     try {
-      const user = await User.findById(req.user._id);
-      const session = await Session.findById(req.params.sessionID);
       const comment = new Comment({
-        sessionID: session._id,
-        userID: user._id,
-        username: user.username,
+        sessionID: ObjectId(req.params.sessionID),
+        userID: req.user._id,
+        username: req.user.username,
         text: req.body.text,
         createdDate: new Date(),
         editedDate: null,

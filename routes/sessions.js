@@ -10,9 +10,6 @@ const commentsController = require('../controllers/comments_controller');
 // Create new session
 router.post('/', authenticateJWT, sessionsController.new);
 
-// Like session
-router.put('/:sessionID/like', authenticateJWT, sessionsController.like);
-
 // Updates session
 router.put(
   '/:sessionID',
@@ -23,10 +20,28 @@ router.put(
 );
 
 // Return all details for specific session
-router.get('/:sessionID', authenticateJWT, sessionsController.detail);
+router.get(
+  '/:sessionID',
+  authenticateJWT,
+  verify.sessionExists,
+  sessionsController.detail
+);
+
+// Like session
+router.put(
+  '/:sessionID/like',
+  authenticateJWT,
+  verify.sessionExists,
+  sessionsController.like
+);
 
 // Unlike session
-router.delete('/:sessionID/like', authenticateJWT, sessionsController.unlike);
+router.delete(
+  '/:sessionID/like',
+  authenticateJWT,
+  verify.sessionExists,
+  sessionsController.unlike
+);
 
 // ***** Feeds *****
 
@@ -39,21 +54,42 @@ router.get(
 );
 
 // All sessions by specific user
-router.get('/user/:userID/', authenticateJWT, sessionsController.overviews);
+router.get(
+  '/user/:userID/',
+  authenticateJWT,
+  verify.userExists,
+  sessionsController.overviews
+);
 
 // ***** Comments *****
 
 // All comments for Session
-router.get('/:sessionID/comments', authenticateJWT, commentsController.all);
+router.get(
+  '/:sessionID/comments',
+  authenticateJWT,
+  verify.sessionExists,
+  commentsController.all
+);
 
 // Create new comment
-router.post('/:sessionID/comments/', authenticateJWT, commentsController.new);
+router.post(
+  '/:sessionID/comments/',
+  authenticateJWT,
+  verify.sessionExists,
+  commentsController.new
+);
 
 // TODO: ADD - Update comment
 router.put('/:sessionID/comments/:commentID');
 
 // TODO: Add -Delete comment
-router.delete('/:sessionID/comments/:commentID');
+router.delete(
+  '/:sessionID/comments/:commentID',
+  authenticateJWT,
+  verify.commentExists,
+  verify.isCommentOwner,
+  commentsController.delete
+);
 
 // Like comment
 router.put(

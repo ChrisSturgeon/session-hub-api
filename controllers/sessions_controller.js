@@ -66,69 +66,60 @@ exports.new = [
       });
     } else {
       try {
-        const user = await User.findById(req.user._id);
-        if (user) {
-          let equipment = {};
-          if (req.body.sport === 'surfing') {
-            equipment = {
-              board: req.body.equipment.board,
-            };
-          }
-
-          if (req.body.sport === 'windsurfing') {
-            equipment = {
-              board: req.body.equipment.board,
-              sail: req.body.equipment.sail,
-            };
-          }
-
-          if (req.body.sport === 'kitesurfing') {
-            equipment = {
-              board: req.body.equipment.board,
-              kite: req.body.equipment.kite,
-            };
-          }
-
-          if (req.body.sport === 'wingsurfing') {
-            equipment = {
-              board: req.body.equipment.board,
-              wing: req.body.equipment.wing,
-            };
-          }
-
-          if (req.body.sport === 'paddleboarding') {
-            equipment = {
-              board: req.body.equipment.board,
-            };
-          }
-          const session = new Session({
-            userID: user._id,
-            username: user.username,
-            description: req.body.description ? req.body.description : null,
-            createdDate: new Date(),
-            activityDate: req.body.date,
-            sport: req.body.sport,
-            locationName: req.body.location.name,
-            coords: req.body.location.coords,
-            equipment: req.body.equipment ? equipment : null,
-            conditions: req.body.conditions,
-            likes: [],
-          });
-
-          const newSession = await session.save();
-
-          res.status(200).json({
-            status: 'success',
-            data: newSession._id,
-            message: 'Session created',
-          });
-        } else {
-          res.status(404).json({
-            status: 'fail',
-            data: null,
-            message: 'No such user found in database',
-          });
+        let equipment = {};
+        if (req.body.sport === 'surfing') {
+          equipment = {
+            board: req.body.equipment.board,
+          };
         }
+
+        if (req.body.sport === 'windsurfing') {
+          equipment = {
+            board: req.body.equipment.board,
+            sail: req.body.equipment.sail,
+          };
+        }
+
+        if (req.body.sport === 'kitesurfing') {
+          equipment = {
+            board: req.body.equipment.board,
+            kite: req.body.equipment.kite,
+          };
+        }
+
+        if (req.body.sport === 'wingsurfing') {
+          equipment = {
+            board: req.body.equipment.board,
+            wing: req.body.equipment.wing,
+          };
+        }
+
+        if (req.body.sport === 'paddleboarding') {
+          equipment = {
+            board: req.body.equipment.board,
+          };
+        }
+        const session = new Session({
+          userID: req.user._id,
+          username: req.user.username,
+          description: req.body.description ? req.body.description : null,
+          createdDate: new Date(),
+          activityDate: req.body.date,
+          sport: req.body.sport,
+          locationName: req.body.location.name,
+          coords: req.body.location.coords,
+          equipment: req.body.equipment ? equipment : null,
+          conditions: req.body.conditions,
+          likes: [],
+        });
+
+        const newSession = await session.save();
+
+        res.status(200).json({
+          status: 'success',
+          data: newSession._id,
+          message: 'Session created',
+        });
       } catch (err) {
         return next(err);
       }
@@ -196,66 +187,54 @@ exports.update = [
       });
     } else {
       try {
-        // console.log(req.body);
-        // console.log(req.params.sessionID);
-        console.log(req.user._id);
-        const user = await User.findById(req.user._id);
-        if (user) {
-          let equipment = {};
-          if (req.body.sport === 'surfing') {
-            equipment = {
-              board: req.body.equipment.board,
-            };
-          }
-
-          if (req.body.sport === 'windsurfing') {
-            equipment = {
-              board: req.body.equipment.board,
-              sail: req.body.equipment.sail,
-            };
-          }
-
-          if (req.body.sport === 'kitesurfing') {
-            equipment = {
-              board: req.body.equipment.board,
-              kite: req.body.equipment.kite,
-            };
-          }
-
-          if (req.body.sport === 'wingsurfing') {
-            equipment = {
-              board: req.body.equipment.board,
-              wing: req.body.equipment.wing,
-            };
-          }
-
-          if (req.body.sport === 'paddleboarding') {
-            equipment = {
-              board: req.body.equipment.board,
-            };
-          }
-          await Session.findByIdAndUpdate(req.params.sessionID, {
-            description: req.body.description ? req.body.description : null,
-            activityDate: req.body.date,
-            sport: req.body.sport,
-            locationName: req.body.location.name,
-            coords: req.body.location.coords,
-            equipment: req.body.equipment ? equipment : null,
-            conditions: req.body.conditions,
-          });
-
-          res.status(200).json({
-            status: 'success',
-            data: null,
-            message: 'Session Updated',
-          });
-        } else {
-          res.status(404).json({
-            status: 'fail',
-            data: null,
-            message: 'No such user found in database',
-          });
+        let equipment = {};
+        if (req.body.sport === 'surfing') {
+          equipment = {
+            board: req.body.equipment.board,
+          };
         }
+
+        if (req.body.sport === 'windsurfing') {
+          equipment = {
+            board: req.body.equipment.board,
+            sail: req.body.equipment.sail,
+          };
+        }
+
+        if (req.body.sport === 'kitesurfing') {
+          equipment = {
+            board: req.body.equipment.board,
+            kite: req.body.equipment.kite,
+          };
+        }
+
+        if (req.body.sport === 'wingsurfing') {
+          equipment = {
+            board: req.body.equipment.board,
+            wing: req.body.equipment.wing,
+          };
+        }
+
+        if (req.body.sport === 'paddleboarding') {
+          equipment = {
+            board: req.body.equipment.board,
+          };
+        }
+        await Session.findByIdAndUpdate(req.params.sessionID, {
+          description: req.body.description ? req.body.description : null,
+          activityDate: req.body.date,
+          sport: req.body.sport,
+          locationName: req.body.location.name,
+          coords: req.body.location.coords,
+          equipment: req.body.equipment ? equipment : null,
+          conditions: req.body.conditions,
+        });
+
+        res.status(200).json({
+          status: 'success',
+          data: null,
+          message: 'Session Updated',
+        });
       } catch (err) {
         return next(err);
       }
@@ -309,13 +288,6 @@ exports.detail = async (req, res, next) => {
       },
     ]);
 
-    if (!session) {
-      res.status(404).json({
-        status: 'fail',
-        data: null,
-        message: `No session with ID ${req.params.sessionID} found`,
-      });
-    }
     res.status(200).json({
       status: 'success',
       data: session[0],
@@ -329,16 +301,6 @@ exports.detail = async (req, res, next) => {
 // Likes session
 exports.like = async (req, res, next) => {
   try {
-    const session = await Session.findById(req.params.sessionID);
-    if (!session) {
-      res.status(404).json({
-        status: 'fail',
-        data: null,
-        message: `Session ${req.params.sessionID} not found`,
-      });
-      return;
-    }
-
     const existingLike = await Session.findOne({
       _id: req.params.sessionID,
       likes: { $in: req.user._id },
@@ -460,15 +422,6 @@ exports.feed = async (req, res, next) => {
 // Session overviews for specific user
 exports.overviews = async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.userID);
-
-    if (!user) {
-      res.status(404).json({
-        status: 'fail',
-        data: null,
-        message: 'No user found',
-      });
-    }
     const filter = { userID: ObjectId(req.params.userID) };
     const sessions = await Session.aggregate([
       { $match: filter },

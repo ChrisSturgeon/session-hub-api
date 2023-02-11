@@ -95,13 +95,9 @@ exports.declineFriendRequest = async (req, res, next) => {
   }
 };
 
-// Returns friends list as array in JSON for given userID
 exports.allFriends = async (req, res, next) => {
   try {
-    // const user = await User.findById(req.params.userID);
-
     const filter = { _id: ObjectId(req.params.userID) };
-
     const friends = await User.aggregate([
       { $match: filter },
       { $project: { friends: 1 } },
