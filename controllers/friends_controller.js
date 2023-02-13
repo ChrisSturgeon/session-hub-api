@@ -101,6 +101,7 @@ exports.allFriends = async (req, res, next) => {
     const friends = await User.aggregate([
       { $match: filter },
       { $project: { friends: 1 } },
+
       {
         $lookup: {
           from: 'users',
@@ -114,6 +115,7 @@ exports.allFriends = async (req, res, next) => {
                 username: 1,
               },
             },
+            { $sort: { username: 1 } },
           ],
         },
       },
