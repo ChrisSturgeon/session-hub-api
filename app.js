@@ -5,11 +5,13 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const cors = require('cors');
+const compression = require('compression');
 
 // Security imports
 require('dotenv').config();
 const JwtStrategy = require('./jwt');
 const passport = require('passport');
+const helmet = require('helmet');
 
 // Router imports
 const indexRouter = require('./routes/index');
@@ -28,6 +30,8 @@ const app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
+app.use(compression());
+app.use(helmet());
 app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
@@ -35,8 +39,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 passport.use(JwtStrategy);
-
-// Facebook login strategy
 
 app.use('/api', indexRouter);
 app.use('/api/users', usersRouter);
