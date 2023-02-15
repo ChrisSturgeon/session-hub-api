@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const cors = require('cors');
 const compression = require('compression');
+const bodyParser = require('body-parser');
 
 // Security imports
 require('dotenv').config();
@@ -30,9 +31,12 @@ const app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
-app.use(compression());
 app.use(helmet());
+app.use(compression());
 app.use(cors());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -40,7 +44,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 passport.use(JwtStrategy);
 
-app.use('/api', indexRouter);
+app.use('/', indexRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/friends', friendsRouter);
 app.use('/api/sessions', sessionsRouter);
