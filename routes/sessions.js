@@ -43,6 +43,14 @@ router.delete(
   sessionsController.unlike
 );
 
+router.delete(
+  '/:sessionID',
+  authenticateJWT,
+  verify.sessionExists,
+  verify.isSessionOwner,
+  sessionsController.delete
+);
+
 // ***** Feeds *****
 
 // Feed of latest posts by friends for given user

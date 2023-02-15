@@ -9,8 +9,8 @@ const Comment = require('../models/comment');
 exports.new = [
   body('date').exists().withMessage('Comment date required'),
   body('text')
-    .isLength({ min: 1 })
-    .withMessage('Comment length must be at least 1')
+    .isLength({ min: 2 })
+    .withMessage('Comment length must be at least 2')
     .isLength({ max: 1500 })
     .withMessage('Comments must be <= 1500 characters when escaped')
     .trim()
@@ -37,11 +37,11 @@ exports.new = [
         likes: [],
       });
 
-      await comment.save();
+      const newComment = await comment.save();
 
       res.status(201).json({
         status: 'success',
-        data: null,
+        data: newComment,
         message: 'Comment successfully created',
       });
     } catch (err) {

@@ -242,6 +242,21 @@ exports.update = [
   },
 ];
 
+// Deletes session
+exports.delete = async (req, res, next) => {
+  try {
+    await Session.findByIdAndDelete(req.params.sessionID);
+
+    res.status(200).json({
+      status: 'success',
+      data: null,
+      message: 'Session succesfully deleted',
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
 // Returns details for a given session
 exports.detail = async (req, res, next) => {
   try {
