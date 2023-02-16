@@ -411,7 +411,6 @@ exports.feed = async (req, res, next) => {
               },
             },
           ],
-          as: 'post',
         },
       },
       { $sort: { 'post.activityDate': -1 } },
