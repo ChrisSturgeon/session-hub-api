@@ -375,9 +375,9 @@ exports.feed = async (req, res, next) => {
       {
         $lookup: {
           from: 'sessions',
-          // localField: '_id',
-          // foreignField: 'userID',
-          as: 'sessions',
+          localField: '_id',
+          foreignField: 'userID',
+          as: 'session',
           pipeline: [
             { $sort: { activityDate: -1 } },
             { $limit: 1 },
