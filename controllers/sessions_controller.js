@@ -365,56 +365,80 @@ exports.unlike = async (req, res, next) => {
 // Most recent session of each of the friends of specific userID
 exports.feed = async (req, res, next) => {
   try {
-    const filter = {
-      'friends.ID': ObjectId(req.user._id),
-    };
+    // const filter = {
+    //   'friends.ID': ObjectId(req.user._id),
+    // };
+
+    // const feedSessions = await User.aggregate([
+    //   { $match: filter },
+    //   { $project: { _id: 1, thumbURL: 1 } },
+    //   {
+    //     $lookup: {
+    //       from: 'sessions',
+    //       localField: '_id',
+    //       foreignField: 'userID',
+    //       // let: { testID: '_id' },
+    //       // pipeline: [
+    //       //   { $sort: { activityDate: -1 } },
+    //       //   { $limit: 1 },
+    //       //   {
+    //       //     $lookup: {
+    //       //       from: 'comments',
+    //       //       localField: 'testID',
+    //       //       foreignField: 'sessionID',
+    //       //       as: 'commentsCount',
+    //       //     },
+    //       //   },
+    //       //   {
+    //       //     $addFields: {
+    //       //       hasLiked: {
+    //       //         $cond: [
+    //       //           { $in: [ObjectId(req.params.userID), '$likes'] },
+    //       //           true,
+    //       //           false,
+    //       //         ],
+    //       //       },
+    //       //       likesCount: { $size: '$likes' },
+    //       //       commentsCount: { $size: '$commentsCount' },
+    //       //     },
+    //       //   },
+    //       //   {
+    //       //     $project: {
+    //       //       createdDate: 0,
+    //       //       equipment: 0,
+    //       //       description: 0,
+    //       //       conditions: 0,
+    //       //     },
+    //       //   },
+    //       // ],
+    //       as: 'session',
+    //     },
+    //   },
+    //   { $sort: { 'post.activityDate': -1 } },
+    // ]);
+
+    const filter = { _id: ObjectId(req.user_id) };
 
     const feedSessions = await User.aggregate([
       { $match: filter },
-      { $project: { _id: 1, thumbURL: 1 } },
+      { $project: { friends: 1 } },
+      { $unwind: '$friends' },
+      { $project: { 'friends.since': 0 } },
+      { $sort: { 'friends.name': 1 } },
       {
         $lookup: {
           from: 'sessions',
-          localField: '_id',
+          localField: 'friends.ID',
           foreignField: 'userID',
-          // let: { testID: '_id' },
-          // pipeline: [
-          //   { $sort: { activityDate: -1 } },
-          //   { $limit: 1 },
-          //   {
-          //     $lookup: {
-          //       from: 'comments',
-          //       localField: 'testID',
-          //       foreignField: 'sessionID',
-          //       as: 'commentsCount',
-          //     },
-          //   },
-          //   {
-          //     $addFields: {
-          //       hasLiked: {
-          //         $cond: [
-          //           { $in: [ObjectId(req.params.userID), '$likes'] },
-          //           true,
-          //           false,
-          //         ],
-          //       },
-          //       likesCount: { $size: '$likes' },
-          //       commentsCount: { $size: '$commentsCount' },
-          //     },
-          //   },
-          //   {
-          //     $project: {
-          //       createdDate: 0,
-          //       equipment: 0,
-          //       description: 0,
-          //       conditions: 0,
-          //     },
-          //   },
-          // ],
           as: 'session',
+          pipeline: [
+            {
+              $sort: { activityDate: -1 },
+            },
+            { $limit: 1 },
+          ],
         },
       },
-      { $sort: { 'post.activityDate': -1 } },
     ]);
 
     if (!feedSessions) {

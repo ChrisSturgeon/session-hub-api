@@ -101,24 +101,39 @@ exports.allFriends = async (req, res, next) => {
     const friends = await User.aggregate([
       { $match: filter },
       { $project: { friends: 1 } },
-
+      { $unwind: '$friends' },
+      { $project: { 'friends.since': 0 } },
+      { $sort: { 'friends.name': 1 } },
       {
         $lookup: {
-          from: 'users',
+          from: 'sessions',
           localField: 'friends.ID',
-          foreignField: '_id',
-          as: 'friends',
+          foreignField: 'userID',
+          as: 'session',
           pipeline: [
             {
-              $project: {
-                thumbURL: 1,
-                username: 1,
-              },
+              $sort: { activityDate: -1 },
             },
-            { $sort: { username: 1 } },
+            { $limit: 1 },
           ],
         },
       },
+
+      // {
+      //   $lookup: {
+      //     from: 'users',
+      //     localField: 'friends.ID',
+      //     foreignField: '_id',
+      //     // let: { friendsID: '_id' },
+      //     as: 'friends',
+      //   },
+      // },
+      // {
+      //   $project: {
+      //     'friends._id': 1,
+      //     'friends.username': 1,
+      //   },
+      // },
     ]);
 
     if (friends) {
