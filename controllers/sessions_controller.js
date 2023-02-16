@@ -377,14 +377,14 @@ exports.feed = async (req, res, next) => {
           from: 'sessions',
           localField: '_id',
           foreignField: 'userID',
-          as: 'session',
+          let: { testID: '_id' },
           pipeline: [
             { $sort: { activityDate: -1 } },
             { $limit: 1 },
             {
               $lookup: {
                 from: 'comments',
-                localField: '_id',
+                localField: 'testID',
                 foreignField: 'sessionID',
                 as: 'commentsCount',
               },
@@ -411,6 +411,7 @@ exports.feed = async (req, res, next) => {
               },
             },
           ],
+          as: 'session',
         },
       },
       { $sort: { 'post.activityDate': -1 } },
