@@ -153,8 +153,6 @@ exports.allRequests = async (req, res, next) => {
       {
         $lookup: {
           from: 'users',
-          localField: 'requester.ID',
-          foreignField: '_id',
           as: 'requesterDetails',
           pipeline: [
             {
