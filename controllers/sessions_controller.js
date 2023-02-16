@@ -377,40 +377,40 @@ exports.feed = async (req, res, next) => {
           from: 'sessions',
           localField: '_id',
           foreignField: 'userID',
-          let: { testID: '_id' },
-          pipeline: [
-            { $sort: { activityDate: -1 } },
-            { $limit: 1 },
-            {
-              $lookup: {
-                from: 'comments',
-                localField: 'testID',
-                foreignField: 'sessionID',
-                as: 'commentsCount',
-              },
-            },
-            {
-              $addFields: {
-                hasLiked: {
-                  $cond: [
-                    { $in: [ObjectId(req.params.userID), '$likes'] },
-                    true,
-                    false,
-                  ],
-                },
-                likesCount: { $size: '$likes' },
-                commentsCount: { $size: '$commentsCount' },
-              },
-            },
-            {
-              $project: {
-                createdDate: 0,
-                equipment: 0,
-                description: 0,
-                conditions: 0,
-              },
-            },
-          ],
+          // let: { testID: '_id' },
+          // pipeline: [
+          //   { $sort: { activityDate: -1 } },
+          //   { $limit: 1 },
+          //   {
+          //     $lookup: {
+          //       from: 'comments',
+          //       localField: 'testID',
+          //       foreignField: 'sessionID',
+          //       as: 'commentsCount',
+          //     },
+          //   },
+          //   {
+          //     $addFields: {
+          //       hasLiked: {
+          //         $cond: [
+          //           { $in: [ObjectId(req.params.userID), '$likes'] },
+          //           true,
+          //           false,
+          //         ],
+          //       },
+          //       likesCount: { $size: '$likes' },
+          //       commentsCount: { $size: '$commentsCount' },
+          //     },
+          //   },
+          //   {
+          //     $project: {
+          //       createdDate: 0,
+          //       equipment: 0,
+          //       description: 0,
+          //       conditions: 0,
+          //     },
+          //   },
+          // ],
           as: 'session',
         },
       },
