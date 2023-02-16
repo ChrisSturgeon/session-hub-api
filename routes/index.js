@@ -9,12 +9,3 @@ router.get('/', function (req, res, next) {
 });
 
 module.exports = router;
-
-router.post('/', function (req, res, next) {
-  console.log('hi');
-  res.status(200).json({
-    status: 'success',
-    data: null,
-    message: 'This was a post route to /',
-  });
-});
