@@ -104,20 +104,6 @@ exports.allFriends = async (req, res, next) => {
       { $unwind: '$friends' },
       { $project: { 'friends.since': 0 } },
       { $sort: { 'friends.name': 1 } },
-      {
-        $lookup: {
-          from: 'sessions',
-          localField: 'friends.ID',
-          foreignField: 'userID',
-          as: 'session',
-          pipeline: [
-            {
-              $sort: { activityDate: -1 },
-            },
-            { $limit: 1 },
-          ],
-        },
-      },
 
       // {
       //   $lookup: {
