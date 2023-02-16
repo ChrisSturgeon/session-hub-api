@@ -7,7 +7,6 @@ const logger = require('morgan');
 const cors = require('cors');
 const compression = require('compression');
 const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
 
 // Security imports
 require('dotenv').config();
@@ -23,14 +22,8 @@ const sessionsRouter = require('./routes/sessions');
 const commentsRouter = require('./routes/comments');
 
 // MongoDB
-// const mongoStart = require('./mongoConfig');
-// mongoStart();
-
-const mongoDb = process.env.MONGODB_URI;
-mongoose.set('strictQuery', true);
-mongoose.connect(mongoDb, { useUnifiedTopology: true, useNewUrlParser: true });
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'mongo connection error'));
+const mongoStart = require('./mongoConfig');
+mongoStart();
 
 const app = express();
 
@@ -49,14 +42,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
-app.post('/test', (req, res, next) => {
-  res.send('This is the post test route');
-});
-
 passport.use(JwtStrategy);
 
-app.use('/', indexRouter);
+app.use('/api', indexRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/friends', friendsRouter);
 app.use('/api/sessions', sessionsRouter);
