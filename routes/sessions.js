@@ -43,6 +43,7 @@ router.delete(
   sessionsController.unlike
 );
 
+// Delete session
 router.delete(
   '/:sessionID',
   authenticateJWT,

@@ -32,7 +32,7 @@ router.delete(
 );
 
 // All friends requests for user
-router.get('/request/:userID', authenticateJWT, friendsController.allRequests);
+router.get('/request', authenticateJWT, friendsController.allRequests);
 
 // All friends of user
 router.get(

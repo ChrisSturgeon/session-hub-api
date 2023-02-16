@@ -4,7 +4,7 @@ const User = require('./models/user');
 const FriendRequest = require('./models/friendRequest');
 
 exports.isUser = function (req, res, next) {
-  if (req.tokenID.toString() === req.params.userID) {
+  if (req.tokenID.toString() === req.params.userID.toString()) {
     next();
   } else {
     res
