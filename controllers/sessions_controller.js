@@ -417,7 +417,7 @@ exports.feed = async (req, res, next) => {
     //   { $sort: { 'post.activityDate': -1 } },
     // ]);
 
-    const filter = { _id: ObjectId(req.user_id) };
+    const filter = { _id: req.user._id };
 
     const feedSessions = await User.aggregate([
       { $match: filter },
@@ -425,20 +425,21 @@ exports.feed = async (req, res, next) => {
       { $unwind: '$friends' },
       { $project: { 'friends.since': 0 } },
       { $sort: { 'friends.name': 1 } },
-      // {
-      //   $lookup: {
-      //     from: 'sessions',
-      //     localField: 'friends.ID',
-      //     foreignField: 'userID',
-      //     as: 'session',
-      //     pipeline: [
-      //       {
-      //         $sort: { activityDate: -1 },
-      //       },
-      //       { $limit: 1 },
-      //     ],
-      //   },
-      // },
+      {
+        $lookup: {
+          from: 'sessions',
+          localField: 'friends.ID',
+          foreignField: 'userID',
+
+          pipeline: [
+            {
+              $sort: { activityDate: -1 },
+            },
+            { $limit: 1 },
+          ],
+          as: 'session',
+        },
+      },
     ]);
 
     if (!feedSessions) {
