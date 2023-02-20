@@ -417,49 +417,6 @@ exports.feed = async (req, res, next) => {
       { $sort: { 'post.activityDate': -1 } },
     ]);
 
-    // const filter = { 'friends.ID': ObjectId(req.user._id) };
-
-    // const feedSessions = await User.aggregate([
-    //   { $match: { _id: ObjectId(req.params.userID) } },
-    //   {
-    //     $project: {
-    //       friends: 1,
-    //       _id: 1,
-    //     },
-    //   },
-    //   { $unwind: '$friends' },
-    //   {
-    //     $lookup: {
-    //       from: 'sessions',
-    //       localField: 'friends.ID',
-    //       foreignField: 'userID',
-    //       as: 'session',
-    //       pipeline: [{ $project: { locationName: 1 } }],
-    //     },
-    //   },
-
-    // {
-    //   $lookup: {
-    //     from: 'sessions',
-    //     localField: '_id',
-    //     foreignField: 'userID',
-    //     // pipeline: [
-    //     //   {
-    //     //     $sort: { activityDate: -1 },
-    //     //   },
-    //     //   { $limit: 1 },
-    //     // ],
-    //     as: 'session',
-    //   },
-    // },
-
-    // { $unwind: '$session' },
-    // ]);
-
-    // const feedSessions = await Session.aggregate([
-    //   { $match:  }
-    // ])
-
     if (!feedSessions) {
       res.status(404).json({
         status: 'fail',
@@ -477,33 +434,6 @@ exports.feed = async (req, res, next) => {
     return next(err);
   }
 };
-
-// { $project: { friends: 1 } },
-// { $unwind: '$friends' },
-// { $project: { 'friends.since': 0 } },
-// { $sort: { 'friends.name': 1 } },
-// {
-//   $lookup: {
-//     from: 'sessions',
-//     // localField: 'friends.ID',
-//     // foreignField: 'userID',
-//     let: { friendID: 'ID' },
-//     pipeline: [
-//       {
-//         $match: { $expr: { $and: [{ $eq: ['$userID', '$$friendID'] }] } },
-//       },
-//       { $match: { userID: '$$friendID' } },
-//       // {
-//       //   $sort: { activityDate: -1 },
-//       // },
-//       // { $limit: 1 },
-//       {
-//         $match: { $expr: { $and: [{ $eq: ['userID', '$$friendID'] }] } },
-//       },
-//     ],
-//     as: 'session',
-//   },
-// },
 
 // Session overviews for specific user
 exports.overviews = async (req, res, next) => {
