@@ -427,6 +427,7 @@ exports.feed = async (req, res, next) => {
           _id: 0,
         },
       },
+      { $unwind: '$friends' },
       {
         $lookup: {
           from: 'sessions',
