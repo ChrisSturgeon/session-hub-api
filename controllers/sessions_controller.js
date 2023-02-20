@@ -425,21 +425,28 @@ exports.feed = async (req, res, next) => {
       { $unwind: '$friends' },
       { $project: { 'friends.since': 0 } },
       { $sort: { 'friends.name': 1 } },
-      {
-        $lookup: {
-          from: 'sessions',
-          localField: 'friends.ID',
-          foreignField: 'userID',
-
-          pipeline: [
-            {
-              $sort: { activityDate: -1 },
-            },
-            { $limit: 1 },
-          ],
-          as: 'session',
-        },
-      },
+      // {
+      //   $lookup: {
+      //     from: 'sessions',
+      //     // localField: 'friends.ID',
+      //     // foreignField: 'userID',
+      //     let: { friendID: 'ID' },
+      //     pipeline: [
+      //       // {
+      //       //   $match: { $expr: { $and: [{ $eq: ['$userID', '$$friendID'] }] } },
+      //       // },
+      //       // { $match: { userID: '$$friendID' } },
+      //       // // {
+      //       // //   $sort: { activityDate: -1 },
+      //       // // },
+      //       // // { $limit: 1 },
+      //       // {
+      //       //   $match: { $expr: { $and: [{ $eq: ['userID', '$$friendID'] }] } },
+      //       // },
+      //     ],
+      //     as: 'session',
+      //   },
+      // },
     ]);
 
     if (!feedSessions) {
