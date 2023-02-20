@@ -434,6 +434,7 @@ exports.feed = async (req, res, next) => {
           localField: 'friends.ID',
           foreignField: 'userID',
           as: 'session',
+          pipeline: [{ $project: { locationName: 1 } }],
         },
       },
 
