@@ -225,6 +225,7 @@ exports.profileUpdate = [
         bio: req.body.bio,
         sports: req.body.sports,
         imgURL: req.body.imgURL,
+        thumbURL: req.body.imgURL,
       });
 
       res.status(200).json({
