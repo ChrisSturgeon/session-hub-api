@@ -377,7 +377,6 @@ exports.feed = async (req, res, next) => {
           from: 'sessions',
           localField: '_id',
           foreignField: 'userID',
-          let: { testID: '_id' },
           pipeline: [
             { $sort: { activityDate: -1 } },
             { $limit: 1 },
@@ -414,7 +413,7 @@ exports.feed = async (req, res, next) => {
           as: 'session',
         },
       },
-      { $sort: { 'post.activityDate': -1 } },
+      { $sort: { 'session.activityDate': -1 } },
     ]);
 
     if (!feedSessions) {
