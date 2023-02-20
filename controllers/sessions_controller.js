@@ -424,7 +424,7 @@ exports.feed = async (req, res, next) => {
       {
         $project: {
           friends: 1,
-          _id: 0,
+          _id: 1,
         },
       },
       { $unwind: '$friends' },
