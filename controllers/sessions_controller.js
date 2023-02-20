@@ -427,20 +427,20 @@ exports.feed = async (req, res, next) => {
           thumbURL: 1,
         },
       },
-      {
-        $lookup: {
-          from: 'sessions',
-          localField: '_id',
-          foreignField: 'userID',
-          // pipeline: [
-          //   {
-          //     $sort: { activityDate: -1 },
-          //   },
-          //   { $limit: 1 },
-          // ],
-          as: 'session',
-        },
-      },
+      // {
+      //   $lookup: {
+      //     from: 'sessions',
+      //     localField: '_id',
+      //     foreignField: 'userID',
+      //     // pipeline: [
+      //     //   {
+      //     //     $sort: { activityDate: -1 },
+      //     //   },
+      //     //   { $limit: 1 },
+      //     // ],
+      //     as: 'session',
+      //   },
+      // },
 
       // { $unwind: '$session' },
     ]);
