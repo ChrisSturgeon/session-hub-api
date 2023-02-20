@@ -156,7 +156,8 @@ exports.allRequests = async (req, res, next) => {
       {
         $lookup: {
           from: 'users',
-          as: 'requesterDetails',
+          localField: 'requester.ID',
+          foreignField: '_id',
           pipeline: [
             {
               $project: {
@@ -165,6 +166,7 @@ exports.allRequests = async (req, res, next) => {
               },
             },
           ],
+          as: 'requesterDetails',
         },
       },
       {
