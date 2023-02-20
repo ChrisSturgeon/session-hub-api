@@ -417,16 +417,25 @@ exports.feed = async (req, res, next) => {
     //   { $sort: { 'post.activityDate': -1 } },
     // ]);
 
-    const filter = { 'friends.ID': ObjectId(req.user._id) };
+    // const filter = { 'friends.ID': ObjectId(req.user._id) };
 
     const feedSessions = await User.aggregate([
-      { $match: filter },
+      { $match: { _id: ObjectId(req.params.userID) } },
       {
         $project: {
-          username: 1,
-          thumbURL: 1,
+          friends: 1,
+          _id: 0,
         },
       },
+      {
+        $lookup: {
+          from: 'sessions',
+          localField: 'friends.ID',
+          foreignField: 'userID',
+          as: 'session',
+        },
+      },
+
       // {
       //   $lookup: {
       //     from: 'sessions',
