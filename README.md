@@ -13,7 +13,7 @@
 
 The backend of my final project from the Node JS section of the The Odin Project built with Express. The aim was to use REST principles with a MongoDB Database to create a social media site where users can create accounts, add friends, and post about their recent surfing, windsurfing, kitesurfing etc. sessions for other users to like and comment on.
 
-View the live project [here](https://chrissturgeon.github.io/session-hub-front-end/#/) and view the project guidelines [here](https://www.theodinproject.com/lessons/nodejs-odin-book).
+View the live project [here](https://chrissturgeon.github.io/session-hub-front-end/#/), view the front-end repo [here](https://github.com/ChrisSturgeon/session-hub-front-end), and view the project guidelines [here](https://www.theodinproject.com/lessons/nodejs-odin-book).
 
 ![Home page screenshot](/public/images/screenshot.jpg 'IMG DESCRIPTION')
 
